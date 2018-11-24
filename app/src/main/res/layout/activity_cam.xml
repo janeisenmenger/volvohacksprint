@@ -19,15 +19,26 @@
     android:layout_marginBottom="16dp"
     android:layout_marginTop="16dp"
     android:text="@string/take_picture" />
+
     <Button
-        android:id="@+id/btn_back"
+    android:id="@+id/btn_back"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_alignStart="@id/btn_back"
+    android:layout_marginBottom="16dp"
+    android:layout_marginTop="16dp"
+    android:text="@string/back"/>
+
+    <Button
+        android:id="@+id/btn_flash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignStart="@id/btn_back"
+        android:layout_toRightOf="@id/btn_takepicture"
         android:layout_marginBottom="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/back"/>
+        android:text="@string/flash"/>
 
     <ImageView
         android:id="@+id/imageView"
