@@ -8,6 +8,9 @@
     <string name="take_picture">Take picture</string>
     <string name="back">Return</string>
     <string name="flash">Toggle Flash</string>
+    <string name="down">Down</string>
+    <string name="up">Up</string>
+    <string name="measure">Measure</string>
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
     <string name="pref_description_social_recommendations">Recommendations for people to contact
         based on your message history
@@ -75,4 +78,5 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_main">Nebula App</string>
+    <string name="title_activity_preview_image">PreviewImage</string>
 </resources>

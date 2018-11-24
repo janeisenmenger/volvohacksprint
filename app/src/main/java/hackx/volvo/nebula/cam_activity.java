@@ -81,7 +81,9 @@ public class cam_activity extends AppCompatActivity {
         takePictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                takePicture();
+                Date currentTime = Calendar.getInstance().getTime();
+                String pictureLocation = Environment.getExternalStorageDirectory()+"/pic_" + getIntent().getStringExtra("type") + currentTime.toString() + ".jpg";
+                takePicture(pictureLocation);
             }
         });
         final Button button_back = findViewById(R.id.btn_back);
@@ -92,13 +94,6 @@ public class cam_activity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
 
-            }
-        });
-        final Button button_flash = findViewById(R.id.btn_flash);
-        button_flash.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Code here executes on main thread after user presses button
-                //captureRequestBuilder.set(CaptureRequest.FLASH_MODE , CaptureRequest.FLASH_MODE_TORCH);
             }
         });
     }
@@ -161,7 +156,7 @@ public class cam_activity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    protected void takePicture() {
+    protected void takePicture(final String pictureName) {
         if(null == cameraDevice) {
             Log.e(TAG, "cameraDevice is null");
             return;
@@ -194,8 +189,7 @@ public class cam_activity extends AppCompatActivity {
             // Orientation
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
-            Date currentTime = Calendar.getInstance().getTime();
-            final File file = new File(Environment.getExternalStorageDirectory()+"/pic_" + getIntent().getStringExtra("type") + currentTime.toString() + ".jpg");
+            final File file = new File(pictureName);
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
@@ -215,6 +209,7 @@ public class cam_activity extends AppCompatActivity {
                             image.close();
                         }
                     }
+                    openPreviewActivity(pictureName);
                 }
                 private void save(byte[] bytes) throws IOException {
                     OutputStream output = null;
@@ -358,5 +353,10 @@ public class cam_activity extends AppCompatActivity {
         super.onPause();
     }
 
+    private void openPreviewActivity(String pictureLocation){
 
+        Intent intent = new Intent(cam_activity.this, PreviewImageActivity.class);
+        intent.putExtra("pictureLocation",pictureLocation);
+        startActivity(intent);
+}
 }
