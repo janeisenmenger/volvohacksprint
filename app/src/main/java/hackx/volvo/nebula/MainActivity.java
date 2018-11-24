@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         //get the spinner from the xml.
-        Spinner dropdown = findViewById(R.id.spinner1);
+        final Spinner dropdown = findViewById(R.id.spinner1);
         //create a list of items for the spinner.
         String[] items = new String[]{
                 SparesParts.TrackLink.toString(),
@@ -46,17 +46,14 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Code here executes on main thread after user presses button
-                dispatchTakePictureIntent();
+                Intent intent = new Intent(MainActivity.this, cam_activity.class);
+                intent.putExtra("type",dropdown.getSelectedItem().toString());
+                startActivity(intent);
+                finish();
 
             }
         });
     }
 
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
-    }
 
 }
