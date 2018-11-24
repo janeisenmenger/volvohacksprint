@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Camera;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -14,10 +15,12 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.TotalCaptureResult;
+import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Bundle;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -91,6 +94,13 @@ public class cam_activity extends AppCompatActivity {
 
             }
         });
+        final Button button_flash = findViewById(R.id.btn_flash);
+        button_flash.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                //captureRequestBuilder.set(CaptureRequest.FLASH_MODE , CaptureRequest.FLASH_MODE_TORCH);
+            }
+        });
     }
     TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
         @Override
@@ -160,6 +170,7 @@ public class cam_activity extends AppCompatActivity {
         try {
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraDevice.getId());
             Size[] jpegSizes = null;
+            mFlashSupported = false;
             if (characteristics != null) {
                 jpegSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
             }
@@ -175,7 +186,11 @@ public class cam_activity extends AppCompatActivity {
             outputSurfaces.add(new Surface(textureView.getSurfaceTexture()));
             final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             captureBuilder.addTarget(reader.getSurface());
-            captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+            //captureBuilder.set(CaptureRequest.FLASH_MODE , CaptureRequest.FLASH_MODE_TORCH);
+            captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
+            captureBuilder.set(CaptureRequest.CONTROL_AF_MODE , CameraMetadata.CONTROL_AF_MODE_MACRO);
+            captureBuilder.set(CaptureRequest.CONTROL_AWB_MODE , CameraMetadata.CONTROL_AWB_MODE_AUTO);
+            captureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER , CameraMetadata.CONTROL_AF_TRIGGER_START);
             // Orientation
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
@@ -235,6 +250,7 @@ public class cam_activity extends AppCompatActivity {
                 public void onConfigureFailed(CameraCaptureSession session) {
                 }
             }, mBackgroundHandler);
+            //captureBuilder.set(CaptureRequest.FLASH_MODE , CaptureRequest.FLASH_MODE_TORCH);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -247,6 +263,7 @@ public class cam_activity extends AppCompatActivity {
             Surface surface = new Surface(texture);
             captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.addTarget(surface);
+            //captureRequestBuilder.set(CaptureRequest.FLASH_MODE , CaptureRequest.FLASH_MODE_TORCH);
             cameraDevice.createCaptureSession(Arrays.asList(surface), new CameraCaptureSession.StateCallback(){
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
@@ -291,7 +308,11 @@ public class cam_activity extends AppCompatActivity {
         if(null == cameraDevice) {
             Log.e(TAG, "updatePreview error, return");
         }
-        captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+
+        captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
+        captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE , CameraMetadata.CONTROL_AF_MODE_MACRO);
+        captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE , CameraMetadata.CONTROL_AWB_MODE_AUTO);
+        captureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER , CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
         try {
             cameraCaptureSessions.setRepeatingRequest(captureRequestBuilder.build(), null, mBackgroundHandler);
         } catch (CameraAccessException e) {
@@ -336,5 +357,6 @@ public class cam_activity extends AppCompatActivity {
         stopBackgroundThread();
         super.onPause();
     }
+
 
 }
