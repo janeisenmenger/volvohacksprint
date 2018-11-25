@@ -19,6 +19,7 @@ import org.opencv.core.Core;
 
 import java.io.File;
 
+import hackx.volvo.nebula.detect.DetectionException;
 import hackx.volvo.nebula.detect.SpikeMeasurer;
 
 import static hackx.volvo.nebula.Helper.Image.GetRotatedImage;
@@ -115,9 +116,15 @@ public class PreviewImageActivity extends AppCompatActivity {
             int lineHeight = (int) (lineview.getY() - scaleDownImage.top);
 
             int predictedY = (lineHeight * orignalHeight) / scaleDownImageHeight;
+            double size;
+            try {
+                SpikeMeasurer s = new SpikeMeasurer(imageLocation, predictedY, 8.7, 16, 26);
+                 size = s.measure();
+            } catch (DetectionException e) {
+                e.printStackTrace();
+                size = -1;
+            }
 
-            SpikeMeasurer s = new SpikeMeasurer(imageLocation, predictedY, 8.7, 16, 26);
-            double size = s.measure();
 
             Intent intent = new Intent(PreviewImageActivity.this, ResultActivity.class);
             Bundle bundle = new Bundle();

@@ -25,7 +25,8 @@ public class SpikeMeasurer {
 		File imageFile = new File(imagePath); 
 		if(imageFile.exists() && !imageFile.isDirectory()) { 
 			Mat image = Imgcodecs.imread(imageFile.getPath());
-    		_rawImage = image;
+    		_imagePath = imagePath;
+			_rawImage = image;
     		_gougePx = gougePx;
     		_plateSize = plateSize;
     		_minSpikeSizeMm = minSpikeSizeMm;
@@ -54,8 +55,9 @@ public class SpikeMeasurer {
 		Imgproc.line(_rawImage, new Point(0, _topPx), new Point(_rawImage.size().width-1, _topPx), new Scalar(0,255,0), 3);		
 		Imgproc.line(_rawImage, new Point(0, _bottomPx), new Point(_rawImage.size().width-1, _bottomPx), new Scalar(0,255,0), 3);
 		Imgproc.line(_rawImage, new Point(0, _gougePx), new Point(_rawImage.size().width-1, _gougePx), new Scalar(0,255,0), 3);
-			
-		//OpenCVHelper.writeImageToFile(_rawImage, _imagePath);
+
+		//throw new RuntimeException(_imagePath);
+		OpenCVHelper.writeImageToFile(_rawImage, _imagePath);
 		
 		return  (double) ((_gougePx-_topPx) * _onePxAsMm);
 	}
