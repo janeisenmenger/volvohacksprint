@@ -10,7 +10,6 @@ import org.opencv.imgproc.Imgproc;
 public class BottomLineDetector {
 	
 	private Mat _grayImage;
-	private Mat _colouredImage;
 	private final int _gougePx;
 	private final Size _imgSize;
 	
@@ -18,11 +17,9 @@ public class BottomLineDetector {
 	// input color image
 	public BottomLineDetector(Mat inputImage, int gougePx) {
 		_gougePx = gougePx;
-		_colouredImage = new Mat();
-		inputImage.copyTo(_colouredImage);
 		_grayImage = new Mat();
 		Imgproc.cvtColor(inputImage, _grayImage, Imgproc.COLOR_RGB2GRAY);
-		_imgSize = _colouredImage.size();
+		_imgSize = _grayImage.size();
 	}
 	
 	public int getBottomPx() {
@@ -30,11 +27,9 @@ public class BottomLineDetector {
         int bottomCrop = (int) (_gougePx + _imgSize.height * 0.1);
         int blurKernelSize = 5;
         int cannyMinMax = 126;
-        double scaleFactor = 0.25;
         
         Mat cropped = OpenCVHelper.cropImage(_grayImage, topCrop, bottomCrop, (int) _imgSize.width/4, (int) (_imgSize.width/4)*2);
-		cropped = OpenCVHelper.scaleImage(cropped, scaleFactor);
-		
+
 		Mat blurred = OpenCVHelper.blur(cropped, blurKernelSize);
 		Mat edges = OpenCVHelper.applyCanny(blurred, cannyMinMax, cannyMinMax);
 		
@@ -59,7 +54,7 @@ public class BottomLineDetector {
 		if (max.getLength() == 0) {
 			throw new DetectionException("No horizontal bottom line found");
 		} else {
-			return (int) (((max._y0 + max._y1) / 2)/scaleFactor + topCrop);
+			return (int) (((max._y0 + max._y1) / 2) + topCrop);
 		
 		}	
 	}	

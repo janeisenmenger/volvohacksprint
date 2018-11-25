@@ -13,15 +13,17 @@ import org.opencv.core.Size;
 
 public class SpikeMeasurer {
 	private String _imagePath;
-	private Mat _rawImage;
-	private int _gougePx;
-	private int _bottomPx;
-	private int _topPx;
-	private final double _plateSize;
-	private final double _maxSpikeSizeMm;
-	private final double _minSpikeSizeMm;
-	private double _oneMmAsPx;
-	private double _onePxAsMm;
+	private final double _factor = 0.25;
+    public Mat _rawImage;
+    public Mat _smallImage;
+    public final int _initialGougePx;
+    public int _bottomPx;
+	public final double _plateSize;
+    public final double _maxSpikeSizeMm;
+    public final double _minSpikeSizeMm;
+    public ArrayList<Double> _resultValues;
+    public ArrayList<Integer> _resultTopPxs;
+
 		
 	public SpikeMeasurer(String imagePath, int gougePx, double plateSize, double minSpikeSizeMm, double maxSpikeSizeMm) {
 		File imageFile = new File(imagePath); 
@@ -29,57 +31,69 @@ public class SpikeMeasurer {
 			Mat image = Imgcodecs.imread(imageFile.getPath());
     		_imagePath = imagePath;
 			_rawImage = image;
-    		_gougePx = gougePx;
+            _smallImage = OpenCVHelper.scaleImage(_rawImage, _factor);
+            _initialGougePx = gougePx;
     		_plateSize = plateSize;
     		_minSpikeSizeMm = minSpikeSizeMm;
     		_maxSpikeSizeMm = maxSpikeSizeMm;
+            _resultValues = new ArrayList<>();
+            _resultTopPxs = new ArrayList<>();
         } else {
         	throw new DetectionException("Could not load image: " + imagePath);
         }
 	}
-	
-	private void calculatePxMmValues() {
-		_oneMmAsPx = (_bottomPx - _gougePx)/ _plateSize;
-		_onePxAsMm = _plateSize/((_bottomPx - _gougePx)*1.0);
-	}
-	
+
+	public synchronized void addTopPx(int topPx) {
+	    _resultTopPxs.add(topPx);
+    }
+
+    public synchronized void addValue(double value) {
+        _resultValues.add(value);
+    }
+
 	public double measure() {
-		BottomLineDetector b = new BottomLineDetector(_rawImage, _gougePx);
+        double _oneMmAsPx;
+        double _onePxAsMm;
+        int gougePx;
+        int _topPx;
+
+		BottomLineDetector b = new BottomLineDetector(_smallImage, (int) (_initialGougePx*_factor));
         _bottomPx = b.getBottomPx();
-		ArrayList<Double> resultValues = new ArrayList<>();
-		ArrayList<Integer> resultTopPxs = new ArrayList<>();
 
-		_gougePx -= 5;
-		for (int i = 0; i <= 10; i++, _gougePx++) {
-			calculatePxMmValues();
+		gougePx = (int) (_initialGougePx*_factor) - 5;
 
-			int spikeTopCrop = (int) (_gougePx - ((_maxSpikeSizeMm * 1.25) * _oneMmAsPx));
-			int spikeBottomCrop = (int) (_gougePx - ((_minSpikeSizeMm * 0.5) * _oneMmAsPx));
+		Thread[] threads = new Thread[11];
 
-			SpikeTopDetector s = new SpikeTopDetector(_rawImage, spikeTopCrop, spikeBottomCrop);
-			_topPx = s.getTopPx();
-			resultTopPxs.add(_topPx);
-			double val = (_gougePx-_topPx) * _onePxAsMm;
-            resultValues.add(val);
-
+		for (int i = 0; i < 11; i++, gougePx++) {
+            TopDetectorRunnable r = new TopDetectorRunnable(this, gougePx);
+		    Thread t = new Thread(r);
+		    threads[i] = t;
+		    t.start();
 		}
 
-		double resultValue = 0;
-        for (Double d : resultValues) {
+		try {
+            for (Thread t : threads) {
+                t.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        double resultValue = 0;
+        for (Double d : _resultValues) {
             resultValue += d;
         }
 
         int resultTopPx = 0;
-        for (Integer i : resultTopPxs) {
+        for (Integer i : _resultTopPxs) {
             resultTopPx += i;
         }
-        resultValue /= resultValues.size();
-        resultTopPx /= resultTopPxs.size();
+        resultValue /= _resultValues.size();
+        resultTopPx /= _resultTopPxs.size();
 
-
-        Imgproc.line(_rawImage, new Point(0, resultTopPx), new Point(_rawImage.size().width-1, resultTopPx), new Scalar(0,255,0), 3);
-		Imgproc.line(_rawImage, new Point(0, _bottomPx), new Point(_rawImage.size().width-1, _bottomPx), new Scalar(0,255,0), 3);
-		Imgproc.line(_rawImage, new Point(0, _gougePx+5), new Point(_rawImage.size().width-1, _gougePx+5), new Scalar(0,255,0), 3);
+        Imgproc.line(_rawImage, new Point(0, resultTopPx/_factor), new Point(_rawImage.size().width-1, resultTopPx/_factor), new Scalar(0,255,0), 3);
+		Imgproc.line(_rawImage, new Point(0, _bottomPx/_factor), new Point(_rawImage.size().width-1, _bottomPx/_factor), new Scalar(0,255,0), 3);
+		Imgproc.line(_rawImage, new Point(0, _initialGougePx), new Point(_rawImage.size().width-1, _initialGougePx), new Scalar(0,255,0), 3);
 
 		OpenCVHelper.writeImageToFile(_rawImage, _imagePath);
 		
