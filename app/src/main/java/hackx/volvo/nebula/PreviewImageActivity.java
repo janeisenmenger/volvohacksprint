@@ -2,11 +2,7 @@ package hackx.volvo.nebula;
 
 import android.Manifest;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -15,8 +11,12 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
+
+import static hackx.volvo.nebula.Helper.Image.GetRotatedImage;
+import static hackx.volvo.nebula.Helper.Image.getImageBounds;
 
 public class PreviewImageActivity extends AppCompatActivity {
 
@@ -24,7 +24,10 @@ public class PreviewImageActivity extends AppCompatActivity {
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private View lineview;
     private ImageView imageView;
+    final int smallStepValue = 2;
+    final int longStepValue = 5;
     int bitMapHeight,bitMapWidth;
+    String imageLocation;
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -38,59 +41,67 @@ public class PreviewImageActivity extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.imageview);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        String imageLocation = getIntent().getStringExtra("pictureLocation");
+        imageLocation = getIntent().getBundleExtra("camBundle").getString("pictureLocation");
         File imgFile = new File(imageLocation);
         if(imgFile.exists()){
-
-            Bitmap myBitmap = rotate(BitmapFactory.decodeFile(imgFile.getAbsolutePath()),90);
             ImageView myImage = (ImageView) findViewById(R.id.imageview);
-            myImage.setImageBitmap(myBitmap);
+            myImage.setImageBitmap(GetRotatedImage(imageLocation));
 
             imageView.getViewTreeObserver().addOnGlobalLayoutListener(layoutListener);
 
             final Button downButton = findViewById(R.id.btn_down);
-            downButton.setOnTouchListener(downButtonListiner);
+            downButton.setOnClickListener(downButtonListiner);
+            downButton.setOnTouchListener(downButtonLongTouchListiner);
 
             final Button upButton = findViewById(R.id.btn_up);
-            upButton.setOnTouchListener(upButtonListiner);
+            upButton.setOnClickListener(upButtonListiner);
+            upButton.setOnTouchListener(upButtonLongTouchListiner);
 
             final Button measureButton = findViewById(R.id.btn_measure);
             measureButton.setOnClickListener(measureBtnListiner);
-        };
-    }
-
-    public static Bitmap rotate(Bitmap bitmap, float degrees) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degrees);
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-    }
-
-    public static RectF getImageBounds(ImageView imageView) {
-        RectF bounds = new RectF();
-        Drawable drawable = imageView.getDrawable();
-        if (drawable != null) {
-            imageView.getImageMatrix().mapRect(bounds, new RectF(drawable.getBounds()));
         }
-        return bounds;
+        else
+        {
+            Toast.makeText(PreviewImageActivity.this, "Sorry!!!, No image found", Toast.LENGTH_LONG).show();
+        }
     }
 
-    View.OnTouchListener downButtonListiner = new View.OnTouchListener() {
+    View.OnClickListener downButtonListiner = new View.OnClickListener() {
+        public void onClick(View v) {
+            restrictMotionToImageBottom(smallStepValue);
+        }
+    };
+
+    View.OnTouchListener downButtonLongTouchListiner = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
-            RectF insideImage = getImageBounds(imageView);
-            if(insideImage.bottom >= lineview.getY() + 5)
-                lineview.setY(lineview.getY() + 5);
+            restrictMotionToImageBottom(longStepValue);
             return true;
         }
     };
 
-    View.OnTouchListener upButtonListiner = new View.OnTouchListener() {
+    View.OnClickListener upButtonListiner = new View.OnClickListener() {
+        public void onClick(View v) {
+            restrictMotionToImageTop(smallStepValue);
+        }
+    };
+
+    View.OnTouchListener upButtonLongTouchListiner = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
-            RectF insideImage = getImageBounds(imageView);
-            if(insideImage.top <= lineview.getY() - 5)
-                lineview.setY(lineview.getY() - 5);
+            restrictMotionToImageTop(longStepValue);
             return true;
         }
     };
+
+    void restrictMotionToImageBottom(int stepValue){
+        RectF insideImage = getImageBounds(imageView);
+        if(insideImage.bottom >= lineview.getY() + stepValue)
+            lineview.setY(lineview.getY() + stepValue);
+    }
+    void restrictMotionToImageTop(int stepValue){
+        RectF insideImage = getImageBounds(imageView);
+        if(insideImage.top <= lineview.getY() - stepValue)
+            lineview.setY(lineview.getY() - stepValue);
+    }
 
     ViewTreeObserver.OnGlobalLayoutListener layoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override
@@ -114,7 +125,15 @@ public class PreviewImageActivity extends AppCompatActivity {
             int orignalHeight = imageView.getDrawable().getIntrinsicHeight();
             int lineHeight = (int) (lineview.getY() - scaleDownImage.top);
 
-            int value = (lineHeight * orignalHeight) / scaleDownImageHeight;
+            int predictedY = (lineHeight * orignalHeight) / scaleDownImageHeight;
+
+            Intent intent = new Intent(PreviewImageActivity.this, ResultActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("pictureLocation",imageLocation);
+            bundle.putString("type", getIntent().getBundleExtra("camBundle").getString("type"));
+            bundle.putInt("predictedY", predictedY);
+            intent.putExtra("camBundle",bundle);
+            startActivity(intent);
         }
     };
 

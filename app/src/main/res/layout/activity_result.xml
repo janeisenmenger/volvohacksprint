@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".PreviewImageActivity"
-    tools:showIn="@layout/activity_preview_image">
+    tools:context=".ResultActivity">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
@@ -18,43 +16,31 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
-        <View
-
-            android:id="@+id/imageviewLine"
-            android:layout_height="2dp"
-            android:layout_width="fill_parent"
-            android:background="#FF0000FF" />
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
+            android:layout_centerInParent="false"
             android:layout_centerHorizontal="true"
+            android:gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:layout_marginBottom="25dp">
+            <TextView
+                android:id="@+id/measure_text_view"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content" />
 
             <Button
-                android:id="@+id/btn_down"
+                android:id="@+id/btn_retry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/down" />
-
-            <Button
-                android:id="@+id/btn_up"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/up" />
-
-
-            <Button
-                android:id="@+id/btn_measure"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/measure" />
+                android:text="@string/retry" />
 
         </LinearLayout>
 
     </RelativeLayout>
+
 </android.support.constraint.ConstraintLayout>

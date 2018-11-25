@@ -11,6 +11,7 @@
     <string name="down">Down</string>
     <string name="up">Up</string>
     <string name="measure">Measure</string>
+    <string name="retry">Retry</string>
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
     <string name="pref_description_social_recommendations">Recommendations for people to contact
         based on your message history
