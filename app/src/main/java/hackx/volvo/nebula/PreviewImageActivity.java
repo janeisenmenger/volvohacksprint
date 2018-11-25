@@ -1,12 +1,10 @@
 package hackx.volvo.nebula;
 
-import android.Manifest;
 import android.content.Intent;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
@@ -20,18 +18,12 @@ import static hackx.volvo.nebula.Helper.Image.getImageBounds;
 
 public class PreviewImageActivity extends AppCompatActivity {
 
-    // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private View lineview;
     private ImageView imageView;
-    final int smallStepValue = 2;
-    final int longStepValue = 5;
-    int bitMapHeight,bitMapWidth;
     String imageLocation;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
+
+    final int smallStepValue = 2;
+    final double approximateLineHeight = 0.738942308;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +43,9 @@ public class PreviewImageActivity extends AppCompatActivity {
 
             final Button downButton = findViewById(R.id.btn_down);
             downButton.setOnClickListener(downButtonListiner);
-            downButton.setOnTouchListener(downButtonLongTouchListiner);
 
             final Button upButton = findViewById(R.id.btn_up);
             upButton.setOnClickListener(upButtonListiner);
-            upButton.setOnTouchListener(upButtonLongTouchListiner);
 
             final Button measureButton = findViewById(R.id.btn_measure);
             measureButton.setOnClickListener(measureBtnListiner);
@@ -72,23 +62,9 @@ public class PreviewImageActivity extends AppCompatActivity {
         }
     };
 
-    View.OnTouchListener downButtonLongTouchListiner = new View.OnTouchListener() {
-        public boolean onTouch(View v, MotionEvent event) {
-            restrictMotionToImageBottom(longStepValue);
-            return true;
-        }
-    };
-
     View.OnClickListener upButtonListiner = new View.OnClickListener() {
         public void onClick(View v) {
             restrictMotionToImageTop(smallStepValue);
-        }
-    };
-
-    View.OnTouchListener upButtonLongTouchListiner = new View.OnTouchListener() {
-        public boolean onTouch(View v, MotionEvent event) {
-            restrictMotionToImageTop(longStepValue);
-            return true;
         }
     };
 
@@ -112,8 +88,12 @@ public class PreviewImageActivity extends AppCompatActivity {
             imageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 
             //Now you can get the width and height from content
+            RectF scaleDownImage = getImageBounds(imageView);
+            int scaleDownImageHeight=(int) (scaleDownImage.bottom - scaleDownImage.top);
+            int orignalHeight = imageView.getDrawable().getIntrinsicHeight();
+            float lineHeight = (float)  approximateLineHeight *  orignalHeight;
 
-            lineview.setY(imageView.getMeasuredHeight() - (imageView.getMeasuredHeight()/2));
+            lineview.setY((float)(scaleDownImage.top * approximateLineHeight) + ((lineHeight * scaleDownImageHeight) / orignalHeight ));
         }
     };
 
