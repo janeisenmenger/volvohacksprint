@@ -10,6 +10,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 
 public class SpikeMeasurer {
+	private String _imagePath;
 	private Mat _rawImage;
 	private final int _gougePx;
 	private int _bottomPx;
@@ -19,15 +20,7 @@ public class SpikeMeasurer {
 	private final double _minSpikeSizeMm;
 	private double _oneMmAsPx;
 	private double _onePxAsMm;
-	
-	public SpikeMeasurer(Mat image, int gougePx, double plateSize, double minSpikeSizeMm, double maxSpikeSizeMm) {
-		_rawImage = image;
-		_gougePx = gougePx;	
-		_plateSize = plateSize;
-		_minSpikeSizeMm = minSpikeSizeMm;
-		_maxSpikeSizeMm = maxSpikeSizeMm;
-	}
-	
+		
 	public SpikeMeasurer(String imagePath, int gougePx, double plateSize, double minSpikeSizeMm, double maxSpikeSizeMm) {
 		File imageFile = new File(imagePath); 
 		if(imageFile.exists() && !imageFile.isDirectory()) { 
@@ -61,8 +54,8 @@ public class SpikeMeasurer {
 		Imgproc.line(_rawImage, new Point(0, _topPx), new Point(_rawImage.size().width-1, _topPx), new Scalar(0,255,0), 3);		
 		Imgproc.line(_rawImage, new Point(0, _bottomPx), new Point(_rawImage.size().width-1, _bottomPx), new Scalar(0,255,0), 3);
 		Imgproc.line(_rawImage, new Point(0, _gougePx), new Point(_rawImage.size().width-1, _gougePx), new Scalar(0,255,0), 3);
-		
-		OpenCVHelper.writeImageToFile(_rawImage, "out.jpg");
+			
+		OpenCVHelper.writeImageToFile(_rawImage, _imagePath);
 		
 		return  (double) ((_gougePx-_topPx) * _onePxAsMm);
 	}
