@@ -1,6 +1,8 @@
 package hackx.volvo.nebula.detect;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.OptionalDouble;
 
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -12,7 +14,7 @@ import org.opencv.core.Size;
 public class SpikeMeasurer {
 	private String _imagePath;
 	private Mat _rawImage;
-	private final int _gougePx;
+	private int _gougePx;
 	private int _bottomPx;
 	private int _topPx;
 	private final double _plateSize;
@@ -43,22 +45,44 @@ public class SpikeMeasurer {
 	
 	public double measure() {
 		BottomLineDetector b = new BottomLineDetector(_rawImage, _gougePx);
-		_bottomPx = b.getBottomPx();
-		calculatePxMmValues();
-		
-        int spikeTopCrop = (int) (_gougePx - ((_maxSpikeSizeMm * 1.25) * _oneMmAsPx));
-        int spikeBottomCrop = (int) (_gougePx - ((_minSpikeSizeMm * 0.5) * _oneMmAsPx));	
-		
-		SpikeTopDetector s = new SpikeTopDetector(_rawImage, spikeTopCrop, spikeBottomCrop);
-		_topPx = s.getTopPx();
-		
-		Imgproc.line(_rawImage, new Point(0, _topPx), new Point(_rawImage.size().width-1, _topPx), new Scalar(0,255,0), 3);		
-		Imgproc.line(_rawImage, new Point(0, _bottomPx), new Point(_rawImage.size().width-1, _bottomPx), new Scalar(0,255,0), 3);
-		Imgproc.line(_rawImage, new Point(0, _gougePx), new Point(_rawImage.size().width-1, _gougePx), new Scalar(0,255,0), 3);
+        _bottomPx = b.getBottomPx();
+		ArrayList<Double> resultValues = new ArrayList<>();
+		ArrayList<Integer> resultTopPxs = new ArrayList<>();
 
-		//throw new RuntimeException(_imagePath);
+		_gougePx -= 5;
+		for (int i = 0; i <= 10; i++, _gougePx++) {
+			calculatePxMmValues();
+
+			int spikeTopCrop = (int) (_gougePx - ((_maxSpikeSizeMm * 1.25) * _oneMmAsPx));
+			int spikeBottomCrop = (int) (_gougePx - ((_minSpikeSizeMm * 0.5) * _oneMmAsPx));
+
+			SpikeTopDetector s = new SpikeTopDetector(_rawImage, spikeTopCrop, spikeBottomCrop);
+			_topPx = s.getTopPx();
+			resultTopPxs.add(_topPx);
+			double val = (_gougePx-_topPx) * _onePxAsMm;
+            resultValues.add(val);
+
+		}
+
+		double resultValue = 0;
+        for (Double d : resultValues) {
+            resultValue += d;
+        }
+
+        int resultTopPx = 0;
+        for (Integer i : resultTopPxs) {
+            resultTopPx += i;
+        }
+        resultValue /= resultValues.size();
+        resultTopPx /= resultTopPxs.size();
+
+
+        Imgproc.line(_rawImage, new Point(0, resultTopPx), new Point(_rawImage.size().width-1, resultTopPx), new Scalar(0,255,0), 3);
+		Imgproc.line(_rawImage, new Point(0, _bottomPx), new Point(_rawImage.size().width-1, _bottomPx), new Scalar(0,255,0), 3);
+		Imgproc.line(_rawImage, new Point(0, _gougePx+5), new Point(_rawImage.size().width-1, _gougePx+5), new Scalar(0,255,0), 3);
+
 		OpenCVHelper.writeImageToFile(_rawImage, _imagePath);
 		
-		return  (double) ((_gougePx-_topPx) * _onePxAsMm);
+		return resultValue;
 	}
 }
