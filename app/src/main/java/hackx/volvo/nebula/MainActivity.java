@@ -1,8 +1,9 @@
 package hackx.volvo.nebula;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -13,15 +14,12 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 public class MainActivity extends AppCompatActivity {
 
     enum SparesParts{
         TrackLink, TripleGrouserShoe, DoubleGrouserShoe, BottomRoller, TopRoller, Idler, Sprocket;
     }
 
-    static final int REQUEST_IMAGE_CAPTURE = 1;
     public boolean next;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
