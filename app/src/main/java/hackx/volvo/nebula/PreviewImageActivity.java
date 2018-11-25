@@ -5,13 +5,21 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+
 import java.io.File;
+
+import hackx.volvo.nebula.detect.SpikeMeasurer;
 
 import static hackx.volvo.nebula.Helper.Image.GetRotatedImage;
 import static hackx.volvo.nebula.Helper.Image.getImageBounds;
@@ -28,6 +36,7 @@ public class PreviewImageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        System.loadLibrary("opencv_java3");
         setContentView(R.layout.activity_preview_image);
         lineview = (View) findViewById(R.id.imageviewLine);
         imageView = (ImageView) findViewById(R.id.imageview);
@@ -107,11 +116,14 @@ public class PreviewImageActivity extends AppCompatActivity {
 
             int predictedY = (lineHeight * orignalHeight) / scaleDownImageHeight;
 
+            SpikeMeasurer s = new SpikeMeasurer(imageLocation, predictedY, 8.7, 16, 26);
+            double size = s.measure();
+
             Intent intent = new Intent(PreviewImageActivity.this, ResultActivity.class);
             Bundle bundle = new Bundle();
             bundle.putString("pictureLocation",imageLocation);
             bundle.putString("type", getIntent().getBundleExtra("camBundle").getString("type"));
-            bundle.putInt("predictedY", predictedY);
+            bundle.putDouble("result", size);
             intent.putExtra("camBundle",bundle);
             startActivity(intent);
         }

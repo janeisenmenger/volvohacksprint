@@ -26,8 +26,9 @@ public class ResultActivity extends AppCompatActivity {
             myImage.setImageBitmap(GetRotatedImage(imageLocation));
 
             TextView textView = findViewById(R.id.measure_text_view);
-            int measureValue = getIntent().getBundleExtra("camBundle").getInt("predictedY");
+            double measureValue = getIntent().getBundleExtra("camBundle").getDouble("result");
             StringBuilder sb = new StringBuilder();
+
             sb.append("The predicted value is:");
             sb.append(measureValue);
             String textViewString = sb.toString();
