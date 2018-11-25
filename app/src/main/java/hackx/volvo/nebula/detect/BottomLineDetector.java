@@ -37,7 +37,7 @@ public class BottomLineDetector {
 		
 		Mat blurred = OpenCVHelper.blur(cropped, blurKernelSize);
 		Mat edges = OpenCVHelper.applyCanny(blurred, cannyMinMax, cannyMinMax);
-		
+
 		ArrayList<Line> houghLines = OpenCVHelper.getAllHoughLines(edges);
 		
 		if (houghLines.size() == 0) {

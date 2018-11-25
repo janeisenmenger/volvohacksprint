@@ -70,6 +70,9 @@ public class OpenCVHelper {
 	    
 	    for (int i = 0; i < lineImage.cols(); i++) {
 	        double data[] = lineImage.get(0, i);
+	        if (data.length == 0) {
+	        	throw new DetectionException("No Hough lines deteced");
+			}
 	        double rho1 = data[0];
 	        double theta1 = data[1];
 	        double cosTheta = Math.cos(theta1);
