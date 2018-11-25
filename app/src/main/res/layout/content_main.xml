@@ -14,19 +14,59 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="10dp">
-    <Spinner
-        android:id="@+id/spinner1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/btn_dropdown"
-        android:spinnerMode="dropdown"/>
+        <Spinner
+            android:id="@+id/spinner1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/btn_dropdown"
+            android:spinnerMode="dropdown"/>
 
-    <Button
-        android:id="@+id/takePicture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/spinner1"
-        android:text="@string/take_picture"
-        android:layout_alignParentRight="true"/>
+        <Button
+            android:id="@+id/takePicture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/spinner1"
+            android:text="@string/take_picture"
+            android:layout_alignParentRight="true"/>
+
+        <CheckBox
+            android:id="@+id/cracks"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cracks"
+            android:layout_below="@id/spinner1" />
+
+        <CheckBox
+            android:id="@+id/flat_spots"
+            android:layout_below="@id/cracks"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/flat_spots" />
+
+        <CheckBox
+            android:id="@+id/box3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/flat_spots"
+            android:text="@string/vis_inspect" />
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/box3"
+            android:text="Save"/>
+        <Button
+            android:id="@+id/btn_flat_example"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/flat_spots"
+            android:layout_alignBaseline="@id/flat_spots"
+            android:text="Example"/>
+
+        <ImageView android:id="@+id/example_img"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            android:clickable="true"  />
     </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

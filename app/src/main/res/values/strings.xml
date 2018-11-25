@@ -79,4 +79,7 @@
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_main">Nebula App</string>
     <string name="title_activity_preview_image">PreviewImage</string>
+    <string name="cracks">Any visible Cracks</string>
+    <string name="flat_spots">Any flat spots on the BottomRollers</string>
+    <string name="vis_inspect">Another Inspection Checkbox</string>
 </resources>
