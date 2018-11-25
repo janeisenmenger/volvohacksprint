@@ -22,15 +22,15 @@ public class ResultActivity extends AppCompatActivity {
         String imageLocation = getIntent().getBundleExtra("camBundle").getString("pictureLocation");
         File imgFile = new File(imageLocation);
         if(imgFile.exists()){
-           ImageView myImage = (ImageView) findViewById(R.id.imageview);
+            ImageView myImage = (ImageView) findViewById(R.id.imageview);
             myImage.setImageBitmap(GetRotatedImage(imageLocation));
 
             TextView textView = findViewById(R.id.measure_text_view);
             double measureValue = getIntent().getBundleExtra("camBundle").getDouble("result");
             StringBuilder sb = new StringBuilder();
 
-            sb.append("The predicted value is:");
-            sb.append(measureValue);
+            sb.append(" Estimated Height: " + String.format("%.2f", measureValue) + " mm");
+            sb.append("\n Percentage life Remaining: "+ String.format("%.2f", getestimatedLife(measureValue))+" %");
             String textViewString = sb.toString();
             textView.setText(textViewString);
 
@@ -54,4 +54,15 @@ public class ResultActivity extends AppCompatActivity {
         }
     };
 
+    double getestimatedLife(double measureValue){
+        switch (getIntent().getBundleExtra("camBundle").getString("type")){
+            case "TripleGrouserShoe":
+                return (measureValue - 16) * 10;
+            case "DoubleGrouserShoe":
+                return (measureValue - 15) * 5;
+            default:
+                return 0;
+        }
+
+    }
 }
