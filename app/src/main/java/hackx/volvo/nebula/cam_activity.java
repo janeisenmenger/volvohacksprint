@@ -356,7 +356,10 @@ public class cam_activity extends AppCompatActivity {
     private void openPreviewActivity(String pictureLocation){
 
         Intent intent = new Intent(cam_activity.this, PreviewImageActivity.class);
-        intent.putExtra("pictureLocation",pictureLocation);
+        Bundle bundle = new Bundle();
+        bundle.putString("pictureLocation",pictureLocation);
+        bundle.putString("type",getIntent().getStringExtra("type"));
+        intent.putExtra("camBundle",bundle);
         startActivity(intent);
 }
 }
